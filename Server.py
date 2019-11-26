@@ -1,0 +1,201 @@
+import socket
+import threading
+import queue
+import mysql.connector
+
+import ThreadPool
+import ChatRoom
+from Settings import HOST, PORT, MAX_CONNECT, readMessage
+from Encryption import decodeId, decryptPasswd, encodeId
+
+# users database
+UsersDB = mysql.connector.connect(
+    host="127.0.0.1",  # 数据库主机地址
+    user="root",  # 数据库用户名
+    passwd='993759',  # 数据库密码
+    database='UChat_users'
+)
+
+DBCursor = UsersDB.cursor()
+thread_pool = ThreadPool.ThreadPool(2 * MAX_CONNECT, True)
+
+
+def initChatRooms():
+    DBCursor.execute('select * from chatrooms;')
+    result = DBCursor.fetchall()
+    print(result)
+    for i in result:
+        ChatRoom.CreateChatRoom(int(i[0]), DBCursor, UsersDB, thread_pool, i[1], False)
+    print(ChatRoom.ChatRooms)
+
+
+# connection preparation
+initChatRooms()
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((HOST, PORT))
+server.listen(MAX_CONNECT)
+print('Server start listen in PORT: ', PORT)
+
+
+# check information by database
+def checkUser(user_id):
+    DBCursor.execute("SELECT password FROM users WHERE id = %s", (user_id,))
+    result = DBCursor.fetchall()  # fetchall() 获取所有记录
+    if len(result) == 0:
+        return False
+    if len(result) > 1:
+        print("DATABASE DUPLICATION")
+        return False
+    return result[0][0]
+
+
+def checkUserExist(user_id):
+    DBCursor.execute("SELECT * FROM users where id = %s", (user_id,))
+    result = DBCursor.fetchall()  # fetchall() 获取所有记录
+    if len(result) == 0:
+        return True
+    else:
+        return False
+
+
+# insert a user into database
+def createUser(user_id, passwd):
+    DBCursor.execute("insert into users values(%s,%s)", (user_id, passwd))
+    UsersDB.commit()
+
+
+def normalUserListen(user):
+    global message_queue
+    user = user[0]
+    conn = user.conn
+    while True:
+        data = conn.recv(1024)
+        # VALID COMMAND: MES CRR QUI OUT
+        # MES: deliver a message, followed with 2 Bytes room number and max length 1024 Bytes message data
+        # CRR: create a chat room, followed with 2 Bytes room number and 4 Bytes room name
+        # JOI: join in a room, followed with 2 Bytes room number
+        # QUI: quit some room, followed with 2 Bytes room number
+        # OUT: log out
+        Command = int.from_bytes(data[0:2], byteorder='big')
+        if Command == 102:
+            room_no = int.from_bytes(data[2:6], byteorder='big')
+            text = readMessage(data[6:])
+            user.deliverMessage((text + '###').encode('utf-8'), room_no)
+        elif Command == 103:
+            room_no = int.from_bytes(data[2:6], byteorder='big')
+            room_name = data[6:22].decode('ascii').rstrip()
+            new_room = ChatRoom.CreateChatRoom(room_no, DBCursor, UsersDB, thread_pool, room_name)
+            if new_room == 431:
+                send_code = int.to_bytes(431, 2, byteorder='big')
+                conn.sendall(send_code)
+            elif new_room == 432:
+                send_code = int.to_bytes(432, 2, byteorder='big')
+                conn.sendall(send_code)
+            else:
+                user.joinInRoom(room_no)
+                send_code = int.to_bytes(303, 2, byteorder='big')
+                conn.sendall(send_code)
+        elif Command == 104:
+            room_no = int.from_bytes(data[2:6], byteorder='big')
+            if user.joinInRoom(room_no):
+                send_code = int.to_bytes(304, 2, byteorder='big')
+                conn.sendall(send_code)
+            else:
+                send_code = int.to_bytes(441, 2, byteorder='big')
+                conn.sendall(send_code)
+        elif Command == 105:
+            room_no = int.from_bytes(data[2:6], byteorder='big')
+            if user.quitRoom(room_no, DBCursor, UsersDB):
+                send_code = int.to_bytes(305, 2, byteorder='big')
+                conn.sendall(send_code)
+            else:
+                send_code = int.to_bytes(451, byteorder='big')
+                conn.sendall(send_code)
+        elif Command == 106:
+            user.logOut()
+            break
+        else:
+            send_code = int.to_bytes(202, 2, byteorder='big')
+            conn.sendall(send_code)
+
+
+# Every time receive a SYN, check the head for validity
+# if connection success, open a thread for that
+# VALID COMMAND: LOGIN, REGIS, both need user id and password
+# else if illegal connection, close that
+while True:
+    conn, client_addr = server.accept()
+    while True:
+        data = conn.recv(34)
+        Command = int.from_bytes(data[0:2], byteorder='big')
+        if Command == 100:
+            print("LOGIN REQUEST")
+            # read user id, check the format
+            user_id = decodeId(data[2:18])
+            if not user_id:
+                send_code = int.to_bytes(401, 2, byteorder='big')
+                conn.sendall(send_code)
+                conn.close()
+                continue
+            print(user_id, " wants to log in")
+            # check whether the user id exists
+            real_password = checkUser(user_id)
+            print("His real password is: ", real_password)
+            if not real_password:
+                send_code = int.to_bytes(402, 2, byteorder='big')
+                conn.sendall(send_code)
+                conn.close()
+                continue
+            # decode password, check the format
+            passwd = decryptPasswd(data[18:34])
+            print("And the password he entered is: ", passwd)
+            if not passwd:
+                send_code = int.to_bytes(403, 2, byteorder='big')
+                conn.sendall(send_code)
+                conn.close()
+                continue
+            # check whether user id and password are matched
+            if passwd != real_password:
+                send_code = int.to_bytes(404, 2, byteorder='big')
+                conn.sendall(send_code)
+                conn.close()
+                continue
+            # valid user! allocate thread to this connection
+            send_code = int.to_bytes(300, 2, byteorder='big')
+            print(user_id, "LOG IN SUCCESSFULLY")
+            conn.sendall(send_code)
+            new_user = ChatRoom.User(conn, user_id)
+            thread_pool.addTask(normalUserListen, new_user)
+            break
+        elif Command == 101:
+            print("RIGIS CONNECT")
+            user_id = decodeId(data[2:18])
+            if not user_id:
+                send_code = int.to_bytes(401, 2, byteorder='big')
+                conn.sendall(send_code)
+                conn.close()
+                continue
+            print(user_id, " wants to register")
+            result = checkUserExist(user_id)
+            if not result:
+                send_code = int.to_bytes(411, 2, byteorder='big')
+                conn.sendall(send_code)
+                conn.close()
+                continue
+            # decode password, check the format
+            passwd = decryptPasswd(data[18:34])
+            if not passwd:
+                send_code = int.to_bytes(403, 2, byteorder='big')
+                conn.sendall(send_code)
+                conn.close()
+                continue
+            # Valid Register! Create a tuple in database
+            print(user_id, "register successfully")
+            send_code = int.to_bytes(301, 2, byteorder='big')
+            conn.sendall(send_code)
+            createUser(user_id, passwd)
+        else:
+            send_code = int.to_bytes(202, 2, byteorder='big')
+            conn.sendall(send_code)
+            conn.close()
+            continue
