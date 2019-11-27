@@ -4,7 +4,7 @@ import socket
 import threading
 import queue
 import sys
-from Encryption import encryptPasswd, encodeId, decodeId, pad, readMessage, readRoomList
+from Encryption import encryptPasswd, encodeId, decodeId, pad, readMessage, readRoomList, readUserList
 from Settings import HOST, PORT, COMMAND_CODE
 import ThreadPool
 
@@ -13,6 +13,9 @@ MessageQueue = queue.Queue()
 RoomsList = list()
 # True for Rooms List HAVE BEEN Read, False for not
 RoomsListFlag = True
+UsersList = list()
+# True for Rooms List HAVE BEEN Read, False for not
+UsersListFlag = True
 ReturnCode = 0
 # True for message HAVE BEEN Read, False for HAVE NOT BEEN Read
 ReturnCodeFlag = True
@@ -45,6 +48,8 @@ def clientReceiveLogic(conn):
                 break
             elif Command == 307:
                 roomListRecieve(data[2:])
+            elif Command == 308:
+                userListRecieve(data[2:])
         else:
             tkinter.messagebox.showerror(title="ERROR", message="Invalid Command\n"
                                                                 "Data: " + str(Command))
@@ -64,22 +69,13 @@ def roomListRecieve(text):
     RoomsListFlag = False
 
 
-def applyRoomsList():
-    global RoomsList, RoomsListFlag, client, ReturnCodeFlag
-    command = int.to_bytes(107, 2, byteorder='big')
-    client.sendall(command)
-    while ReturnCodeFlag or ReturnCode not in {307, 471}:
+def userListRecieve(text):
+    global UsersList, UsersListFlag
+    while not UsersListFlag:
         continue
-    if ReturnCode == 471:
-        ReturnCodeFlag = True
-        return False
-    while RoomsListFlag:
-        continue
-    result = RoomsList.copy()
-    RoomsList.clear()
-    RoomsListFlag = True
-    ReturnCodeFlag = True
-    return result
+    UsersList.clear()
+    UsersList = readUserList(text)
+    UsersListFlag = False
 
 
 '''
@@ -125,7 +121,41 @@ def sendMessage(room_no, message):
     client.sendall(msg)
     while ReturnCodeFlag or ReturnCode not in {302}:
         continue
-    ReturnCodeFlag=True
+    ReturnCodeFlag = True
+
+
+def applyRoomsList():
+    global RoomsList, RoomsListFlag, client, ReturnCodeFlag
+    command = int.to_bytes(107, 2, byteorder='big')
+    client.sendall(command)
+    while ReturnCodeFlag or ReturnCode not in {307, 471}:
+        continue
+    if ReturnCode == 471:
+        ReturnCodeFlag = True
+        return False
+    while RoomsListFlag:
+        continue
+    result = RoomsList.copy()
+    RoomsList.clear()
+    RoomsListFlag = True
+    ReturnCodeFlag = True
+    return result
+
+
+def listUsers(room_no):
+    global ReturnCodeFlag, ReturnCode, UsersList, UsersListFlag
+    command = int.to_bytes(108, 2, byteorder='big')
+    room_number = int.to_bytes(room_no, 4, byteorder='big')
+    client.sendall(command + room_number)
+    while ReturnCodeFlag or ReturnCode not in {308}:
+        continue
+    while UsersListFlag:
+        continue
+    result = UsersList.copy()
+    UsersList.clear()
+    UsersListFlag = True
+    ReturnCodeFlag = True
+    return result
 
 
 def createRoom(room_no, room_name):
@@ -328,16 +358,25 @@ class ChatRoomPage:
         self.roomWindow = roomWindow
         self.room_no = room_no
 
-        self.buttonSend = tk.Button(self.roomWindow, text='Send', command=self.msgSend)  # 按钮分区中创建按钮并绑定发送消息函数
-        self.buttonQuit = tk.Button(self.roomWindow, text='Quit', command=self.roomQuit)  # 按钮分区中创建按钮并绑定发送消息函数
-        self.txt_msglist = tk.Text(self.roomWindow, state='disabled')  # 消息列表分区中创建文本控件
-        self.txt_msglist.tag_config('green', foreground='blue')  # 消息列表分区中创建标签
-        self.txt_msgsend = tk.Text(self.roomWindow)  # 发送消息分区中创建文本控件
+        self.buttonSend = tk.Button(self.roomWindow, text='Send', command=self.msgSend)
+        self.buttonQuit = tk.Button(self.roomWindow, text='Quit', command=self.roomQuit)
+        self.buttonListUsers = tk.Button(self.roomWindow, text='Users in this room', command=self.listUsers)
+        self.txt_msglist = tk.Text(self.roomWindow, state='disabled')
+        self.txt_msglist.tag_config('green', foreground='blue')
+        self.txt_msgsend = tk.Text(self.roomWindow)
+        self.txt_userslist = tk.Text(self.roomWindow, state='disabled')
 
         self.buttonSend.pack()
         self.buttonQuit.pack()
         self.txt_msglist.pack()
         self.txt_msgsend.pack()
+
+    def listUsers(self):
+        user_list = listUsers(self.room_no)
+        self.txt_userslist.configure(state='normal')
+        for user in user_list:
+            self.txt_userslist.insert('end', user + '\n')
+        self.txt_userslist.configure(state='disabled')
 
     def msgSend(self):
         msg = self.txt_msgsend.get('0.0', 'end')
@@ -349,7 +388,6 @@ class ChatRoomPage:
         self.txt_msglist.configure(state='disabled')
 
     def msgReceive(self, speaker, msg):
-        print(3, speaker, msg)
         self.txt_msglist.configure(state='normal')
         self.txt_msglist.insert('end', speaker + ' :\n' + msg)
         self.txt_msglist.configure(state='disabled')

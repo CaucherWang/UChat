@@ -107,7 +107,7 @@ def normalUserListen(user):
             room_no = int.from_bytes(data[2:6], byteorder='big')
             if user.joinInRoom(room_no):
                 send_code = int.to_bytes(304, 2, byteorder='big')
-                print(user.name, "requires",room_no)
+                print(user.name, "requires", room_no)
                 conn.sendall(send_code)
             else:
                 send_code = int.to_bytes(441, 2, byteorder='big')
@@ -140,6 +140,10 @@ def normalUserListen(user):
                     msg = msg + room_number + room_name
                 msg += int.to_bytes(9999, 4, byteorder='big')
                 conn.sendall(msg)
+        elif Command == 108:
+            room_no = int.from_bytes(data[2:6], byteorder='big')
+            result_msg = ChatRoom.ChatRooms[room_no].listUsers()
+            conn.sendall(int.to_bytes(308, 4, byteorder='big')+result_msg+'###'.encode('ascii'))
         else:
             send_code = int.to_bytes(202, 2, byteorder='big')
             conn.sendall(send_code)

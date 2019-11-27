@@ -56,3 +56,15 @@ def readRoomList(text):
         result.append((room_no, text[i + 4:i + 20].decode('ascii')))
         i += 20
     return result
+
+
+def readUserList(text):
+    text = text.decode('ascii')
+    i = 0
+    result = list()
+    while i <= 1021:
+        if text[i:i + 3] == '###':
+            break
+        result.append(text[i:i + 16].rstrip())
+        i += 16
+    return result

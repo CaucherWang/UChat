@@ -60,6 +60,12 @@ class ChatRoom:
         self.messageQueue = queue.Queue()
         self.dissolve_flag = False
 
+    def listUsers(self):
+        result = bytes()
+        for user in self.users:
+            result += encodeId(user.name)
+        return result
+
     def joinIn(self, new_user):
         self.users.add(new_user)
 
