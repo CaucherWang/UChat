@@ -47,8 +47,8 @@ class User:
         self.room_set.clear()
         self.in_room = False
         send_code = int.to_bytes(306, 2, byteorder='big')
-        self.conn.sendall(send_code)
-        print(self.name, "CLOSE")
+        print(self.name, "QUIT UChat")
+        self.conn.close()
 
 
 # each chat room need an extra thread to multicast message unlimited
@@ -83,7 +83,7 @@ class ChatRoom:
                 conn = speaker.conn
                 for user in self.users:
                     if user != speaker:
-                        user.conn.sendall(int.to_bytes(302, 2, byteorder='big') + encodeId(speaker.name) + message)
+                        user.conn.sendall(int.to_bytes(299, 2, byteorder='big') + encodeId(speaker.name) + message)
 
 
 def CreateChatRoom(room_no, DBCursor, db, thread_pool, room_name='Undefined', flag=True):

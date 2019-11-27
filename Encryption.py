@@ -36,3 +36,23 @@ def encodeId(text):
 def decodeId(text):
     text = text.decode('ascii')
     return text.rstrip()
+
+
+def readMessage(text):
+    text = text.decode('utf-8')
+    for i in range(1003):
+        if text[i] == '#' and text[i + 1] == '#' and text[i + 2] == '#':
+            return text[:i]
+    return False
+
+
+def readRoomList(text):
+    i = 0
+    result = list()
+    while i <= 1021:
+        room_no = int.from_bytes(text[i:i + 4], byteorder='big')
+        if room_no == 9999:
+            break
+        result.append((room_no, text[i + 4:i + 20].decode('ascii')))
+        i += 20
+    return result

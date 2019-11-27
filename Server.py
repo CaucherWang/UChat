@@ -5,8 +5,8 @@ import mysql.connector
 
 import ThreadPool
 import ChatRoom
-from Settings import HOST, PORT, MAX_CONNECT, readMessage
-from Encryption import decodeId, decryptPasswd, encodeId
+from Settings import HOST, PORT, MAX_CONNECT
+from Encryption import decodeId, decryptPasswd, encodeId, readMessage
 
 # users database
 UsersDB = mysql.connector.connect(
@@ -64,6 +64,13 @@ def createUser(user_id, passwd):
     UsersDB.commit()
 
 
+def getRoomList():
+    DBCursor.execute("SELECT * FROM chatrooms")
+    result = DBCursor.fetchall()  # fetchall() 获取所有记录
+    print(result)
+    return result
+
+
 def normalUserListen(user):
     global message_queue
     user = user[0]
@@ -81,6 +88,7 @@ def normalUserListen(user):
             room_no = int.from_bytes(data[2:6], byteorder='big')
             text = readMessage(data[6:])
             user.deliverMessage((text + '###').encode('utf-8'), room_no)
+            conn.sendall(int.to_bytes(302, 2, byteorder='big'))
         elif Command == 103:
             room_no = int.from_bytes(data[2:6], byteorder='big')
             room_name = data[6:22].decode('ascii').rstrip()
@@ -99,6 +107,7 @@ def normalUserListen(user):
             room_no = int.from_bytes(data[2:6], byteorder='big')
             if user.joinInRoom(room_no):
                 send_code = int.to_bytes(304, 2, byteorder='big')
+                print(user.name, "requires",room_no)
                 conn.sendall(send_code)
             else:
                 send_code = int.to_bytes(441, 2, byteorder='big')
@@ -114,6 +123,23 @@ def normalUserListen(user):
         elif Command == 106:
             user.logOut()
             break
+        elif Command == 107:
+            room_list = getRoomList()
+            if len(room_list) == 0:
+                send_code = int.to_bytes(471, 2, byteorder='big')
+                conn.sendall(send_code)
+            else:
+                send_code = int.to_bytes(307, 2, byteorder='big')
+                msg = send_code
+                for room in room_list:
+                    room_number = int.to_bytes(int(room[0]), 4, byteorder='big')
+                    room_name = encodeId(room[1])
+                    if not room_name:
+                        print(room_number, "'s name is invalid")
+                        continue
+                    msg = msg + room_number + room_name
+                msg += int.to_bytes(9999, 4, byteorder='big')
+                conn.sendall(msg)
         else:
             send_code = int.to_bytes(202, 2, byteorder='big')
             conn.sendall(send_code)

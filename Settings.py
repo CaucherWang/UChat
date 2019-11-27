@@ -10,15 +10,19 @@ COMMAND_CODE = {
     104: "JOIN IN A ROOM",
     105: "QUIT A ROOM",
     106: "LOG OUT",
+    107: "LIST ALL ROOMS",
+    108: "LIST ALL USERS",
     201: "CONNECTION FAILURE",
     202: "INVALID COMMAND",
+    299: "RECEIVE MESSAGE",
     300: "LOG IN SUCCESS",
     301: "REGISTER SUCCESS",
-    302: "MESSAGE RECEIVED",
+    302: "SENT SUCCESSFULLY",
     303: "ROOM CREATED",
     304: "JOIN IN SUCCESS",
     305: "QUIT SUCCESS",
     306: "LOG OUT SUCCESS",
+    307: "RETURN ALL ROOMS",
     401: "ILLEGAL USER ID",
     402: "NO USER ID",
     403: "ILLEGAL PASSWORD",
@@ -27,13 +31,7 @@ COMMAND_CODE = {
     431: "ROOM NUMBER DUPLICATION",
     432: "ROOM NAME DUPLICATION",
     441: "NO SUCH ROOM",
-    451: "NO SUCH ROOM"
+    451: "NO SUCH ROOM",
+    471: "NO ROOMS NOW",
+    481: "RETURN ALL USERS"
 }
-
-
-def readMessage(text):
-    text = text.decode('utf-8')
-    for i in range(1003):
-        if text[i] == '#' and text[i + 1] == '#' and text[i + 2] == '#':
-            return text[:i]
-    return False
