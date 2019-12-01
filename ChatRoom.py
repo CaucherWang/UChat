@@ -29,7 +29,7 @@ class User:
             print("ROOM ", room_no, " NOT EXISTS")
             return False
         room = ChatRooms[room_no]
-        room.multicast(self, message)
+        room.multicast(299, self, message)
         return True
 
     def quitRoom(self, room_no, DBCursor, db):
@@ -71,6 +71,7 @@ class ChatRoom:
 
     def joinIn(self, new_user):
         self.users.add(new_user)
+        self.multicast(298, new_user, int.to_bytes(self.number, 4, byteorder='big'))
 
     # if a room is empty, dissolve it at once to free resource
     def leave(self, leave_user, DBCursor, db):
@@ -80,19 +81,23 @@ class ChatRoom:
             db.commit()
             self.dissolve_flag = True
             return
+        self.multicast(297, leave_user, int.to_bytes(self.number, 4, byteorder='big'))
 
-    def multicast(self, speaker, message):
-        self.messageQueue.put((speaker, message))
+    def multicast(self, multicode, speaker, message):
+        self.messageQueue.put((multicode, speaker, message))
 
     def roomDeliverMessage(self):
         while True:
             if self.dissolve_flag:
                 break
             if not self.messageQueue.empty():
-                speaker, message = self.messageQueue.get()
+                multicode, speaker, message = self.messageQueue.get()
                 for user in self.users:
                     if user != speaker:
-                        user.conn.sendall(int.to_bytes(299, 2, byteorder='big') + encodeId(speaker.name) + message)
+                        user.conn.sendall(
+                            int.to_bytes(multicode, 2, byteorder='big') + int.to_bytes(self.number, 4,
+                                                                                       byteorder='big') + encodeId(
+                                speaker.name) + message)
 
 
 def CreateChatRoom(room_no, DBCursor, db, thread_pool, room_name='Undefined', flag=True):

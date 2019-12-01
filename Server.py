@@ -5,7 +5,7 @@ import mysql.connector
 
 import ThreadPool
 import ChatRoom
-from Settings import HOST, PORT, MAX_CONNECT
+from Settings import HOST, PORT, MAX_CONNECT, COMMAND_CODE
 from Encryption import decodeId, decryptPasswd, encodeId, readMessage
 
 # users database
@@ -84,7 +84,7 @@ def normalUserListen(user):
         # QUI: quit some room, followed with 2 Bytes room number
         # OUT: log out
         Command = int.from_bytes(data[0:2], byteorder='big')
-        print(user.name, Command)
+        print(user.name, COMMAND_CODE[Command])
         if Command == 102:
             room_no = int.from_bytes(data[2:6], byteorder='big')
             text = readMessage(data[6:])
@@ -104,11 +104,12 @@ def normalUserListen(user):
                 user.joinInRoom(room_no)
                 send_code = int.to_bytes(303, 2, byteorder='big')
                 conn.sendall(send_code)
+        # wants to join in a room
         elif Command == 104:
             room_no = int.from_bytes(data[2:6], byteorder='big')
             if user.joinInRoom(room_no):
                 send_code = int.to_bytes(304, 2, byteorder='big')
-                print(user.name, "requires", room_no)
+                print(user.name, "joins in room ", room_no)
                 conn.sendall(send_code)
             else:
                 send_code = int.to_bytes(441, 2, byteorder='big')

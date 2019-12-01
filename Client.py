@@ -19,10 +19,11 @@ UsersListFlag = True
 ReturnCode = 0
 # True for message HAVE BEEN Read, False for HAVE NOT BEEN Read
 ReturnCodeFlag = True
+ChatRooms = dict()
 
 
 def clientReceiveLogic(conn):
-    global RoomsListFlag, RoomsList, ReturnCode, ReturnCodeFlag
+    global RoomsListFlag, RoomsList, ReturnCode, ReturnCodeFlag, loginPage
     conn = conn[0]
     while True:
         data = MessageQueue.get()
@@ -41,7 +42,22 @@ def clientReceiveLogic(conn):
                 if not message:
                     print("RECEIVE DATA WITH NO END")
                     continue
-                loginPage.receiveMessage(decodeId(data[2:18]), message)
+                loginPage.receiveMessage(int.from_bytes(data[2:6], byteorder='big'), decodeId(data[6:22]), message)
+            # 298:new user enter the room
+            # 297:an user left this room
+            elif Command in {297, 298}:
+                speaker_id = decodeId(data[6:22])
+                room_no = int.from_bytes(data[2:6], byteorder='big')
+                print(ChatRooms)
+                print(room_no)
+                if Command == 298:
+                    msg = speaker_id + ' enter this chatroom\n'
+                else:
+                    msg = speaker_id + ' has left this chatroom\n'
+                print(msg)
+                ReturnCodeFlag = True
+                ChatRooms[room_no].listUsers()
+                loginPage.receiveMessage(room_no, speaker_id, msg)
 
             elif Command == 306:
                 conn.close()
@@ -109,6 +125,7 @@ def userInforInteract(user_id, password, command_code):
 
 def loginSuccess():
     client_thread_pool.addTask(Listen, client)
+    client_thread_pool.addTask(clientReceiveLogic, client)
     client_thread_pool.addTask(clientReceiveLogic, client)
 
 
@@ -204,6 +221,11 @@ def logout():
     client.sendall(command)
 
 
+'''
+Log in Page
+'''
+
+
 class LoginPage:
     def __init__(self, main_window):
         self.root = main_window
@@ -254,9 +276,14 @@ class LoginPage:
             tkinter.messagebox.showerror(title="Register Fail", message="User ID has Existed!\n"
                                                                         "User: " + userId)
 
-    def receiveMessage(self, speaker, message):
-        print(1, speaker, message)
-        self.roomSelectPage.receiveMessage2(speaker, message)
+    def receiveMessage(self, room_no, speaker, message):
+        print(1, room_no, speaker, message)
+        self.roomSelectPage.receiveMessage2(room_no, speaker, message)
+
+
+'''
+Room Select Page
+'''
 
 
 class RoomSelectPage:
@@ -303,8 +330,8 @@ class RoomSelectPage:
             room_window.title('UChat-ChatRooms:' + str(room_no))
             room_window.grid()
             room_window.pack_propagate(0)
-            self.sonWindow[room_no] = room_window
-            self.chatRoomPage = ChatRoomPage(self, room_window, room_no)
+            chatRoomPage = ChatRoomPage(self, room_window, room_no)
+            self.sonWindow[room_no] = chatRoomPage
         elif result_message == 441:
             tkinter.messagebox.showerror(title="Join In Room Fail", message="Room Not Exists!\n"
                                                                             "Room Number: " + str(room_no))
@@ -340,9 +367,9 @@ class RoomSelectPage:
             tkinter.messagebox.showerror(title="Create Room Fail", message="Room Name Duplication!\n"
                                                                            "Room ID: " + room_id + "\nRoom Name: " + room_name)
 
-    def receiveMessage2(self, speaker, message):
-        print(2, speaker, message)
-        self.chatRoomPage.msgReceive(speaker, message)
+    def receiveMessage2(self, room_no, speaker, message):
+        print(2, room_no, speaker, message)
+        self.sonWindow[room_no].msgReceive(speaker, message)
 
     def removeChild(self, son):
         self.sonWindow[son.room_no].destroy()
@@ -355,11 +382,17 @@ class RoomSelectPage:
         sys.exit(0)
 
 
+'''
+Chat Room Page
+'''
+
+
 class ChatRoomPage:
     def __init__(self, parent, roomWindow, room_no):
         self.parent = parent
         self.roomWindow = roomWindow
         self.room_no = room_no
+        ChatRooms[self.room_no] = self
 
         self.buttonSend = tk.Button(self.roomWindow, text='Send', command=self.msgSend)
         self.buttonQuit = tk.Button(self.roomWindow, text='Quit', command=self.roomQuit)
@@ -378,7 +411,9 @@ class ChatRoomPage:
 
     def listUsers(self):
         self.user_list = listUsers(self.room_no)
+        print(2, self.user_list)
         self.txt_userslist.configure(state='normal')
+        self.txt_userslist.delete('0.0', 'end')
         for user in self.user_list:
             self.txt_userslist.insert('end', user + '\n')
         self.txt_userslist.configure(state='disabled')
@@ -400,8 +435,13 @@ class ChatRoomPage:
     def roomQuit(self):
         result_code = leaveRoom(self.room_no)
         if result_code == 305:
+            del ChatRooms[self.room_no]
             self.parent.removeChild(self)
 
+
+'''
+Client Program Starts here!!!
+'''
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 err_no = client.connect_ex((HOST, PORT))
