@@ -199,13 +199,9 @@ def leaveRoom(room_no):
 
 
 def logout():
-    global ReturnCode, ReturnCodeFlag, client
+    global client
     command = int.to_bytes(106, 2, byteorder='big')
     client.sendall(command)
-    while ReturnCodeFlag or ReturnCode not in {306}:
-        continue
-    ReturnCodeFlag = True
-    sys.exit(0)
 
 
 class LoginPage:
@@ -282,8 +278,8 @@ class RoomSelectPage:
                                           command=self.hitCreateRoom)
         self.createRoomButton.place(x=600, y=400)
         self.logoutButton = tk.Button(self.canvas, text='退出UChat', font=('STFangsong', 18), width=10, height=1,
-                                      command=logout)
-        self.loginButton.place(x=600, y=500)
+                                      command=self.logout)
+        self.logoutButton.pack()
         self.intVar = tk.IntVar()
         self.selectRoomNumber = 0
         self.sonWindow = dict()
@@ -351,6 +347,12 @@ class RoomSelectPage:
     def removeChild(self, son):
         self.sonWindow[son.room_no].destroy()
         del self.sonWindow[son.room_no]
+
+    def logout(self):
+        logout()
+        self.canvas.destroy()
+        self.root.destroy()
+        sys.exit(0)
 
 
 class ChatRoomPage:

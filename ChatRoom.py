@@ -39,9 +39,11 @@ class User:
         self.room_set.remove(room_no)
         result = ChatRooms.get(room_no, False)
         result.leave(self, DBCursor, db)
+        # multicast to all users in room
+        # result.multicast(self,)
         if len(self.room_set) == 0:
             self.in_room = False
-            return True
+        return True
 
     def logOut(self):
         self.room_set.clear()
@@ -64,7 +66,7 @@ class ChatRoom:
         result = bytes()
         for user in self.users:
             result += encodeId(user.name)
-        print("in ChatRoom",result)
+        print("in ChatRoom", result)
         return result
 
     def joinIn(self, new_user):
@@ -77,6 +79,7 @@ class ChatRoom:
             DBCursor.execute("delete from chatrooms where room_number = %s;", (self.number,))
             db.commit()
             self.dissolve_flag = True
+            return
 
     def multicast(self, speaker, message):
         self.messageQueue.put((speaker, message))
@@ -87,7 +90,6 @@ class ChatRoom:
                 break
             if not self.messageQueue.empty():
                 speaker, message = self.messageQueue.get()
-                conn = speaker.conn
                 for user in self.users:
                     if user != speaker:
                         user.conn.sendall(int.to_bytes(299, 2, byteorder='big') + encodeId(speaker.name) + message)
