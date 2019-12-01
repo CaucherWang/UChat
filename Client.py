@@ -312,6 +312,7 @@ class RoomSelectPage:
         self.intVar = tk.IntVar()
         self.selectRoomNumber = 0
         self.sonWindow = dict()
+        self.hitRooms()
 
     def hitRooms(self):
         room_list = applyRoomsList()
@@ -410,6 +411,7 @@ class ChatRoomPage:
         self.txt_msglist.pack()
         self.txt_msgsend.pack()
         self.txt_userslist.pack()
+        self.listUsers()
 
     def listUsers(self):
         self.user_list = listUsers(self.room_no)
