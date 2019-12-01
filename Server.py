@@ -84,8 +84,10 @@ def normalUserListen(user):
         # receive normal message
         if Command == 102:
             room_no = int.from_bytes(data[2:6], byteorder='big')
-            text = readMessage(data[6:])
-            user.deliverMessage((text + '###').encode('utf-8'), room_no)
+            time = data[6:20]
+            print(102, time)
+            text = readMessage(data[20:])
+            user.deliverMessage((text + '###').encode('utf-8'), room_no, time)
             conn.sendall(int.to_bytes(302, 2, byteorder='big'))
         # create a room
         elif Command == 103:
@@ -105,7 +107,7 @@ def normalUserListen(user):
         # wants to join in a room
         elif Command == 104:
             room_no = int.from_bytes(data[2:6], byteorder='big')
-            if user.joinInRoom(room_no):
+            if user.joinInRoom(room_no, data[6:20]):
                 send_code = int.to_bytes(304, 2, byteorder='big')
                 print(user.name, "joins in room ", room_no)
                 conn.sendall(send_code)
@@ -115,7 +117,7 @@ def normalUserListen(user):
         # leave a room
         elif Command == 105:
             room_no = int.from_bytes(data[2:6], byteorder='big')
-            if user.quitRoom(room_no, DBCursor, UsersDB):
+            if user.quitRoom(room_no, DBCursor, UsersDB, data[6:20]):
                 send_code = int.to_bytes(305, 2, byteorder='big')
                 conn.sendall(send_code)
             else:

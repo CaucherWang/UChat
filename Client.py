@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.messagebox
 import socket
+import time
 import threading
 import queue
 import sys
@@ -37,12 +38,13 @@ def clientReceiveLogic(conn):
             ReturnCodeFlag = False
             # 3 Special Response Code
             if Command == 299:
-                message = readMessage(data[18:])
+                message = readMessage(data[36:])
                 ReturnCodeFlag = True
                 if not message:
                     print("RECEIVE DATA WITH NO END")
                     continue
-                loginPage.receiveMessage(int.from_bytes(data[2:6], byteorder='big'), decodeId(data[6:22]), message)
+                loginPage.receiveMessage(int.from_bytes(data[2:6], byteorder='big'), decodeId(data[6:22]), message,
+                                         data[22:36].decode('ascii'))
             # 298:new user enter the room
             # 297:an user left this room
             elif Command in {297, 298}:
@@ -57,7 +59,7 @@ def clientReceiveLogic(conn):
                 print(msg)
                 ReturnCodeFlag = True
                 ChatRooms[room_no].listUsers()
-                loginPage.receiveMessage(room_no, speaker_id, msg)
+                loginPage.receiveMessage(room_no, speaker_id, msg, data[22:36].decode('ascii'))
 
             elif Command == 306:
                 conn.close()
@@ -129,11 +131,11 @@ def loginSuccess():
     client_thread_pool.addTask(clientReceiveLogic, client)
 
 
-def sendMessage(room_no, message):
+def sendMessage(room_no, message, t):
     global ReturnCodeFlag, ReturnCode
     command = int.to_bytes(102, 2, byteorder='big')
     room_number = int.to_bytes(room_no, 4, byteorder='big')
-    msg = command + room_number + (message + '###').encode('utf-8')
+    msg = command + room_number + t.encode('ascii') + (message + '###').encode('utf-8')
     print(msg)
     client.sendall(msg)
     while ReturnCodeFlag or ReturnCode not in {302}:
@@ -189,11 +191,11 @@ def createRoom(room_no, room_name):
     return code
 
 
-def joinInRoom(room_number):
+def joinInRoom(room_number, time):
     global ReturnCodeFlag, ReturnCode
     command = int.to_bytes(104, 2, byteorder='big')
     room_number = int.to_bytes(room_number, 4, byteorder='big')
-    msg = command + room_number
+    msg = command + room_number + time.encode('ascii')
     client.sendall(msg)
     while ReturnCodeFlag or ReturnCode not in {304, 441}:
         continue
@@ -202,11 +204,11 @@ def joinInRoom(room_number):
     return code
 
 
-def leaveRoom(room_no):
+def leaveRoom(room_no, time):
     global ReturnCode, ReturnCodeFlag
     command = int.to_bytes(105, 2, byteorder='big')
     room_number = int.to_bytes(room_no, 4, byteorder='big')
-    msg = command + room_number
+    msg = command + room_number + time.encode('ascii')
     client.sendall(msg)
     while ReturnCodeFlag or ReturnCode not in {305, 451}:
         continue
@@ -276,9 +278,9 @@ class LoginPage:
             tkinter.messagebox.showerror(title="Register Fail", message="User ID has Existed!\n"
                                                                         "User: " + userId)
 
-    def receiveMessage(self, room_no, speaker, message):
-        print(1, room_no, speaker, message)
-        self.roomSelectPage.receiveMessage2(room_no, speaker, message)
+    def receiveMessage(self, room_no, speaker, message, time):
+        print(1, room_no, speaker, message, time)
+        self.roomSelectPage.receiveMessage2(room_no, speaker, message, time)
 
 
 '''
@@ -323,7 +325,7 @@ class RoomSelectPage:
 
     def hitinRooms(self):
         room_no = self.selectRoomNumber
-        result_message = joinInRoom(room_no)
+        result_message = joinInRoom(room_no, time.strftime("%m-%d %H:%M:%S", time.localtime()))
         if result_message == 304:
             room_window = tk.Toplevel(self.canvas)
             room_window.geometry('800x600')
@@ -367,9 +369,9 @@ class RoomSelectPage:
             tkinter.messagebox.showerror(title="Create Room Fail", message="Room Name Duplication!\n"
                                                                            "Room ID: " + room_id + "\nRoom Name: " + room_name)
 
-    def receiveMessage2(self, room_no, speaker, message):
-        print(2, room_no, speaker, message)
-        self.sonWindow[room_no].msgReceive(speaker, message)
+    def receiveMessage2(self, room_no, speaker, message, time):
+        print(2, room_no, speaker, message, time)
+        self.sonWindow[room_no].msgReceive(speaker, message, time)
 
     def removeChild(self, son):
         self.sonWindow[son.room_no].destroy()
@@ -422,18 +424,21 @@ class ChatRoomPage:
         msg = self.txt_msgsend.get('0.0', 'end')
         self.txt_msgsend.delete('0.0', 'end')  # 清空发送消息
         print(msg)
-        sendMessage(self.room_no, msg)
+        t = time.strftime("%m-%d %H:%M:%S", time.localtime())
+        sendMessage(self.room_no, msg, t)
         self.txt_msglist.configure(state='normal')
-        self.txt_msglist.insert('end', "我:\n" + msg)
+        self.txt_msglist.insert('end', t+"我:\n\t" + msg)
         self.txt_msglist.configure(state='disabled')
 
-    def msgReceive(self, speaker, msg):
+    def msgReceive(self, speaker, msg, time):
         self.txt_msglist.configure(state='normal')
-        self.txt_msglist.insert('end', speaker + ' :\n' + msg)
+        if time != 0:
+            self.txt_msglist.insert('end', time+'\t')
+        self.txt_msglist.insert('end', speaker + ' :\n\t' + msg)
         self.txt_msglist.configure(state='disabled')
 
     def roomQuit(self):
-        result_code = leaveRoom(self.room_no)
+        result_code = leaveRoom(self.room_no, time.strftime("%m-%d %H:%M:%S", time.localtime()))
         if result_code == 305:
             del ChatRooms[self.room_no]
             self.parent.removeChild(self)

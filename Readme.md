@@ -159,7 +159,7 @@ def checkUser(user_id):
 
 - 101-用户注册：16字节`user_id`+16字节`password`。头部总长度：34Bytes
 
-- 102-消息发送：4字节`room_number`+16字节`speaker_id`+用户数据。头部总长度：22Bytes
+- 102-消息发送：4字节`room_number`+14字节`send_time`+用户数据。头部总长度：20Bytes
 
 - 103-创建新房间：4字节`room_number`+16字节`room_name`。头部总长度：22Bytes
 
@@ -178,7 +178,7 @@ def checkUser(user_id):
 
 ### 6.3 应答消息头部设计
 
-​	所有应答消息头部都有固定的2字节的命令码加16字节`speaker_id`，剩下均为可选部分。
+​	所有应答消息头部都有固定的2字节的命令码加4字节的房间号加16字节`speaker_id`，剩下均为可选部分。
 
 - 298-新用户进入房间通知消息：4字节`room_number`。头部总长度：22Bytes
 
