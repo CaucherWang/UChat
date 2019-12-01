@@ -31,10 +31,6 @@ def initChatRooms():
 
 # connection preparation
 initChatRooms()
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((HOST, PORT))
-server.listen(MAX_CONNECT)
-print('Server start listen in PORT: ', PORT)
 
 
 # check information by database
@@ -85,11 +81,13 @@ def normalUserListen(user):
         # OUT: log out
         Command = int.from_bytes(data[0:2], byteorder='big')
         print(user.name, COMMAND_CODE[Command])
+        # receive normal message
         if Command == 102:
             room_no = int.from_bytes(data[2:6], byteorder='big')
             text = readMessage(data[6:])
             user.deliverMessage((text + '###').encode('utf-8'), room_no)
             conn.sendall(int.to_bytes(302, 2, byteorder='big'))
+        # create a room
         elif Command == 103:
             room_no = int.from_bytes(data[2:6], byteorder='big')
             room_name = data[6:22].decode('ascii').rstrip()
@@ -114,6 +112,7 @@ def normalUserListen(user):
             else:
                 send_code = int.to_bytes(441, 2, byteorder='big')
                 conn.sendall(send_code)
+        # leave a room
         elif Command == 105:
             room_no = int.from_bytes(data[2:6], byteorder='big')
             if user.quitRoom(room_no, DBCursor, UsersDB):
@@ -122,8 +121,9 @@ def normalUserListen(user):
             else:
                 send_code = int.to_bytes(451, byteorder='big')
                 conn.sendall(send_code)
+        # log out
         elif Command == 106:
-            user.logOut()
+            user.logOut(DBCursor, UsersDB)
             break
         elif Command == 107:
             room_list = getRoomList()
@@ -152,6 +152,10 @@ def normalUserListen(user):
             conn.sendall(send_code)
 
 
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((HOST, PORT))
+server.listen(MAX_CONNECT)
+print('Server start listen in PORT: ', PORT)
 # Every time receive a SYN, check the head for validity
 # if connection success, open a thread for that
 # VALID COMMAND: LOGIN, REGIS, both need user id and password
@@ -168,7 +172,6 @@ while True:
             if not user_id:
                 send_code = int.to_bytes(401, 2, byteorder='big')
                 conn.sendall(send_code)
-                conn.close()
                 continue
             print(user_id, " wants to log in")
             # check whether the user id exists
@@ -177,7 +180,6 @@ while True:
             if not real_password:
                 send_code = int.to_bytes(402, 2, byteorder='big')
                 conn.sendall(send_code)
-                conn.close()
                 continue
             # decode password, check the format
             passwd = decryptPasswd(data[18:34])
@@ -185,13 +187,11 @@ while True:
             if not passwd:
                 send_code = int.to_bytes(403, 2, byteorder='big')
                 conn.sendall(send_code)
-                conn.close()
                 continue
             # check whether user id and password are matched
             if passwd != real_password:
                 send_code = int.to_bytes(404, 2, byteorder='big')
                 conn.sendall(send_code)
-                conn.close()
                 continue
             # valid user! allocate thread to this connection
             send_code = int.to_bytes(300, 2, byteorder='big')
@@ -206,21 +206,18 @@ while True:
             if not user_id:
                 send_code = int.to_bytes(401, 2, byteorder='big')
                 conn.sendall(send_code)
-                conn.close()
                 continue
             print(user_id, " wants to register")
             result = checkUserExist(user_id)
             if not result:
                 send_code = int.to_bytes(411, 2, byteorder='big')
                 conn.sendall(send_code)
-                conn.close()
                 continue
             # decode password, check the format
             passwd = decryptPasswd(data[18:34])
             if not passwd:
                 send_code = int.to_bytes(403, 2, byteorder='big')
                 conn.sendall(send_code)
-                conn.close()
                 continue
             # Valid Register! Create a tuple in database
             print(user_id, "register successfully")
@@ -230,5 +227,4 @@ while True:
         else:
             send_code = int.to_bytes(202, 2, byteorder='big')
             conn.sendall(send_code)
-            conn.close()
             continue

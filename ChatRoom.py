@@ -24,14 +24,6 @@ class User:
         self.room_set.add(room_no)
         return True
 
-    def deliverMessage(self, message, room_no):
-        if room_no not in self.room_set:
-            print("ROOM ", room_no, " NOT EXISTS")
-            return False
-        room = ChatRooms[room_no]
-        room.multicast(299, self, message)
-        return True
-
     def quitRoom(self, room_no, DBCursor, db):
         if room_no not in self.room_set:
             print("ROOM ", room_no, " NOT EXISTS")
@@ -45,10 +37,19 @@ class User:
             self.in_room = False
         return True
 
-    def logOut(self):
+    def deliverMessage(self, message, room_no):
+        if room_no not in self.room_set:
+            print("ROOM ", room_no, " NOT EXISTS")
+            return False
+        room = ChatRooms[room_no]
+        room.multicast(299, self, message)
+        return True
+
+    def logOut(self, DBCursor, db):
+        for room in self.room_set:
+            self.quitRoom(room, DBCursor, db)
         self.room_set.clear()
         self.in_room = False
-        send_code = int.to_bytes(306, 2, byteorder='big')
         print(self.name, "QUIT UChat")
         self.conn.close()
 
