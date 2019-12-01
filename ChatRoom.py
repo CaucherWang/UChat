@@ -64,6 +64,7 @@ class ChatRoom:
         result = bytes()
         for user in self.users:
             result += encodeId(user.name)
+        print("in ChatRoom",result)
         return result
 
     def joinIn(self, new_user):

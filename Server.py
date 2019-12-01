@@ -84,6 +84,7 @@ def normalUserListen(user):
         # QUI: quit some room, followed with 2 Bytes room number
         # OUT: log out
         Command = int.from_bytes(data[0:2], byteorder='big')
+        print(user.name,Command)
         if Command == 102:
             room_no = int.from_bytes(data[2:6], byteorder='big')
             text = readMessage(data[6:])
@@ -143,7 +144,8 @@ def normalUserListen(user):
         elif Command == 108:
             room_no = int.from_bytes(data[2:6], byteorder='big')
             result_msg = ChatRoom.ChatRooms[room_no].listUsers()
-            conn.sendall(int.to_bytes(308, 4, byteorder='big')+result_msg+'###'.encode('ascii'))
+            print(result_msg)
+            conn.sendall(int.to_bytes(308, 2, byteorder='big')+result_msg+'###'.encode('ascii'))
         else:
             send_code = int.to_bytes(202, 2, byteorder='big')
             conn.sendall(send_code)

@@ -14,7 +14,7 @@ RoomsList = list()
 # True for Rooms List HAVE BEEN Read, False for not
 RoomsListFlag = True
 UsersList = list()
-# True for Rooms List HAVE BEEN Read, False for not
+# True for Users List HAVE BEEN Read, False for not
 UsersListFlag = True
 ReturnCode = 0
 # True for message HAVE BEEN Read, False for HAVE NOT BEEN Read
@@ -152,6 +152,7 @@ def listUsers(room_no):
     while UsersListFlag:
         continue
     result = UsersList.copy()
+    print("in listUsers:", result)
     UsersList.clear()
     UsersListFlag = True
     ReturnCodeFlag = True
@@ -366,15 +367,17 @@ class ChatRoomPage:
         self.txt_msgsend = tk.Text(self.roomWindow)
         self.txt_userslist = tk.Text(self.roomWindow, state='disabled')
 
+        self.buttonListUsers.pack()
         self.buttonSend.pack()
         self.buttonQuit.pack()
         self.txt_msglist.pack()
         self.txt_msgsend.pack()
+        self.txt_userslist.pack()
 
     def listUsers(self):
-        user_list = listUsers(self.room_no)
+        self.user_list = listUsers(self.room_no)
         self.txt_userslist.configure(state='normal')
-        for user in user_list:
+        for user in self.user_list:
             self.txt_userslist.insert('end', user + '\n')
         self.txt_userslist.configure(state='disabled')
 
