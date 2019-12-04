@@ -310,15 +310,21 @@ class RoomSelectPage:
                                       command=self.logout)
         self.logoutButton.pack()
         self.intVar = tk.IntVar()
+        self.roomList = []
         self.selectRoomNumber = 0
         self.sonWindow = dict()
         self.hitRooms()
 
     def hitRooms(self):
+        for button in self.roomList:
+            button.pack_forget()
+        self.roomList.clear()
         room_list = applyRoomsList()
         for room in room_list:
-            tk.Radiobutton(self.canvas, text=str(room[0]) + ': ' + room[1], variable=self.intVar, value=room[0],
-                           command=self.selectRoomChange).pack()
+            tmp = tk.Radiobutton(self.canvas, text=str(room[0]) + ': ' + room[1], variable=self.intVar, value=room[0],
+                                 command=self.selectRoomChange)
+            self.roomList.append(tmp)
+            tmp.pack()
         self.intVar.set(room_list[0][0])
 
     def selectRoomChange(self):
@@ -429,13 +435,13 @@ class ChatRoomPage:
         t = time.strftime("%m-%d %H:%M:%S", time.localtime())
         sendMessage(self.room_no, msg, t)
         self.txt_msglist.configure(state='normal')
-        self.txt_msglist.insert('end', t+"我:\n\t" + msg)
+        self.txt_msglist.insert('end', t + "我:\n\t" + msg)
         self.txt_msglist.configure(state='disabled')
 
     def msgReceive(self, speaker, msg, time):
         self.txt_msglist.configure(state='normal')
         if time != 0:
-            self.txt_msglist.insert('end', time+'\t')
+            self.txt_msglist.insert('end', time + '\t')
         self.txt_msglist.insert('end', speaker + ' :\n\t' + msg)
         self.txt_msglist.configure(state='disabled')
 
