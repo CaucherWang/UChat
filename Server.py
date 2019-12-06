@@ -23,7 +23,6 @@ thread_pool = ThreadPool.ThreadPool(2 * MAX_CONNECT, True)
 def initChatRooms():
     DBCursor.execute('select * from chatrooms;')
     result = DBCursor.fetchall()
-    print(result)
     for i in result:
         ChatRoom.CreateChatRoom(int(i[0]), DBCursor, UsersDB, thread_pool, i[1], False)
     print(ChatRoom.ChatRooms)
@@ -62,7 +61,6 @@ def createUser(user_id, passwd):
 
 def listRooms(conn, code):
     room_list = ChatRoom.ChatRooms
-    print("point 2")
     if len(room_list) == 0:
         send_code = int.to_bytes(471, 2, byteorder='big')
         conn.sendall(send_code)
@@ -76,7 +74,6 @@ def listRooms(conn, code):
             msg = msg + room_number + room_name
         msg += int.to_bytes(9999, 4, byteorder='big')
         conn.sendall(msg)
-        print("point 3 ")
 
 
 def normalUserListen(user):

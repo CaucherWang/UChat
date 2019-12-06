@@ -284,7 +284,6 @@ class LoginPage:
         self.roomSelectPage.receiveMessage2(room_no, speaker, message, time)
 
     def receiveRoomList(self, room_list):
-        print("point 5")
         self.roomSelectPage.displayRoomList(room_list)
 
 
@@ -332,14 +331,9 @@ class RoomSelectPage:
         self.displayRoomList(room_list)
 
     def displayRoomList(self, room_list):
-        print("point 6")
-        print(room_list)
-        print(self.roomList)
         for button in self.roomList:
             button.destroy()
-        print("point 6.5")
         self.roomList.clear()
-        print("point 7")
         start_pos = 300
         for room in room_list:
             tmp = tk.Radiobutton(self.canvas, text=str(room[0]) + ': ' + room[1], variable=self.intVar, value=room[0],
@@ -348,9 +342,7 @@ class RoomSelectPage:
             self.roomList.append(tmp)
             tmp.place(x=70, y=start_pos)
             start_pos += 40
-        print("point 8")
         self.intVar.set(room_list[0][0])
-        print("point 9")
 
     def selectRoomChange(self):
         self.selectRoomNumber = self.intVar.get()
