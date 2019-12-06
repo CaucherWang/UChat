@@ -30,7 +30,7 @@ def clientReceiveLogic(conn):
         data = MessageQueue.get()
         Command = int.from_bytes(data[0:2], byteorder='big')
         if Command in COMMAND_CODE.keys():
-            print(Command, '  ', COMMAND_CODE[Command])
+            # print(Command, '  ', COMMAND_CODE[Command])
             # wait for last message to be finished
             while not ReturnCodeFlag:
                 continue
@@ -41,7 +41,7 @@ def clientReceiveLogic(conn):
                 message = readMessage(data[36:])
                 ReturnCodeFlag = True
                 if not message:
-                    print("RECEIVE DATA WITH NO END")
+                    # print("RECEIVE DATA WITH NO END")
                     continue
                 loginPage.receiveMessage(int.from_bytes(data[2:6], byteorder='big'), decodeId(data[6:22]), message,
                                          data[22:36].decode('ascii'))
@@ -50,13 +50,10 @@ def clientReceiveLogic(conn):
             elif Command in {297, 298}:
                 speaker_id = decodeId(data[6:22])
                 room_no = int.from_bytes(data[2:6], byteorder='big')
-                print(ChatRooms)
-                print(room_no)
                 if Command == 298:
                     msg = speaker_id + ' enter this chatroom\n'
                 else:
                     msg = speaker_id + ' has left this chatroom\n'
-                print(msg)
                 ReturnCodeFlag = True
                 ChatRooms[room_no].listUsers()
                 loginPage.receiveMessage(room_no, speaker_id, msg, data[22:36].decode('ascii'))
@@ -135,8 +132,7 @@ def sendMessage(room_no, message, t):
     global ReturnCodeFlag, ReturnCode
     command = int.to_bytes(102, 2, byteorder='big')
     room_number = int.to_bytes(room_no, 4, byteorder='big')
-    msg = command + room_number + t.encode('ascii') + (message + '###').encode('utf-8')
-    print(msg)
+    msg = command + room_number + t.encode('ascii')+(message + '###').encode('utf-8')
     client.sendall(msg)
     while ReturnCodeFlag or ReturnCode not in {302}:
         continue
@@ -171,7 +167,6 @@ def listUsers(room_no):
     while UsersListFlag:
         continue
     result = UsersList.copy()
-    print("in listUsers:", result)
     UsersList.clear()
     UsersListFlag = True
     ReturnCodeFlag = True
@@ -231,26 +226,30 @@ Log in Page
 class LoginPage:
     def __init__(self, main_window):
         self.root = main_window
-        self.canvas = tk.Frame(main_window, width=800, height=600)
+        self.root.geometry('400x300')
+        self.backgroundPhoto = tk.PhotoImage(file='bgphoto.png')
+        self.canvas = tk.Frame(main_window, width=400, height=300)
         self.canvas.grid()
         self.canvas.pack_propagate(0)
 
-        self.welcomeBar = tk.Label(self.canvas, text='Welcome to UChat', bg='grey', fg='pink', font=('Consolas', 22),
-                                   width=30, height=2)
+        self.welcomeBar = tk.Label(self.canvas, text='Welcome to UChat', image=self.backgroundPhoto, compound=tk.CENTER,
+                                   fg='pink', font=('Consolas', 22),
+                                   width=400, height=100)
         self.welcomeBar.pack()
-        tk.Label(self.canvas, text='User name:', font=('Arial', 14)).place(x=180, y=170)
-        tk.Label(self.canvas, text='Password:', font=('Arial', 14)).place(x=180, y=210)
+        tk.Label(self.canvas, text='User name:', font=('Arial', 12)).place(x=20, y=120)
+        tk.Label(self.canvas, text='Password:', font=('Arial', 12)).place(x=20, y=170)
         self.userIdRegion = tk.Entry(self.canvas, show=None, font=('Arial', 14))
-        self.userIdRegion.place(x=280, y=175)
+        self.userIdRegion.place(x=110, y=120)
         self.passwordRegion = tk.Entry(self.canvas, show='*', font=('Arial', 14))
-        self.passwordRegion.place(x=280, y=215)
+        self.passwordRegion.place(x=110, y=170)
 
-        self.loginButton = tk.Button(self.canvas, text='登陆', font=('STFangsong', 18), width=10, height=1,
-                                     command=self.hitLogin)
-        self.loginButton.place(x=280, y=250)
-        self.registerButton = tk.Button(self.canvas, text='注册', font=('STFangsong', 18), width=10, height=1,
+        self.loginButton = tk.Button(self.canvas, text='登陆', font=('Microsoft YaHei', 12), width=10, height=1,
+                                     bg='#00BFFF', bd=1, fg='white', activebackground='#87CEEB',
+                                     command=self.hitLogin, relief='ridge')
+        self.loginButton.place(x=160, y=210)
+        self.registerButton = tk.Button(self.canvas, text='注册', font=('Microsoft YaHei', 12), width=10, height=1, bd=1,
                                         command=self.hitRegister)
-        self.registerButton.place(x=450, y=250)
+        self.registerButton.place(x=160, y=250)
 
     def hitLogin(self):
         userId = self.userIdRegion.get()
@@ -279,7 +278,6 @@ class LoginPage:
                                                                         "User: " + userId)
 
     def receiveMessage(self, room_no, speaker, message, time):
-        print(1, room_no, speaker, message, time)
         self.roomSelectPage.receiveMessage2(room_no, speaker, message, time)
 
 
@@ -291,40 +289,50 @@ Room Select Page
 class RoomSelectPage:
     def __init__(self, main_window):
         self.root = main_window
+        self.root.geometry('800x600')
+        self.backgroundPhoto = tk.PhotoImage(file='bgphoto.png')
         self.canvas = tk.Frame(main_window, width=800, height=600)
         self.canvas.grid()
         self.canvas.pack_propagate(0)
-        self.welcomeBar = tk.Label(self.canvas, text='Here is the room list', bg='grey', fg='pink',
-                                   font=('Consolas', 22), width=30, height=2)
+        self.welcomeBar = tk.Label(self.canvas, text='Here is the room list', image=self.backgroundPhoto,
+                                   compound=tk.CENTER, fg='pink', font=('Consolas', 22),
+                                   width=800, height=200)
         self.welcomeBar.pack()
-        self.loginButton = tk.Button(self.canvas, text='刷新房间列表', font=('STFangsong', 18), width=10, height=1,
+        self.loginButton = tk.Button(self.canvas, text='刷新房间列表', font=('Microsoft YaHei', 16), width=10, height=1,
+                                     bg='#00BFFF', bd=1, fg='white', activebackground='#87CEEB',
                                      command=self.hitRooms)
-        self.loginButton.place(x=30, y=50)
-        self.inRoomButton = tk.Button(self.canvas, text='进入房间', font=('STFangsong', 18), width=10, height=1,
+        self.loginButton.place(x=600, y=300)
+        self.inRoomButton = tk.Button(self.canvas, text='进入房间', font=('Microsoft YaHei', 16), width=10, height=1,
+                                      bg='#00BFFF', bd=1, fg='white', activebackground='#87CEEB',
                                       command=self.hitinRooms)
-        self.inRoomButton.place(x=600, y=300)
-        self.createRoomButton = tk.Button(self.canvas, text='创建新房间', font=('STFangsong', 18), width=10, height=1,
+        self.inRoomButton.place(x=600, y=400)
+        self.createRoomButton = tk.Button(self.canvas, text='创建新房间', font=('Microsoft YaHei', 16), width=10, height=1,
+                                          bg='#00FA9A', bd=1, fg='white', activebackground='#87CEEB',
                                           command=self.hitCreateRoom)
-        self.createRoomButton.place(x=600, y=400)
-        self.logoutButton = tk.Button(self.canvas, text='退出UChat', font=('STFangsong', 18), width=10, height=1,
+        self.createRoomButton.place(x=600, y=500)
+        self.logoutButton = tk.Button(self.canvas, text='退出UChat', font=('Microsoft YaHei', 16), width=10, height=1,
+                                      bg='#FF6347', bd=1, fg='black', activebackground='#FFA07A',
                                       command=self.logout)
-        self.logoutButton.pack()
+        self.logoutButton.place(x=20, y=220)
         self.intVar = tk.IntVar()
-        self.roomList = []
         self.selectRoomNumber = 0
+        self.roomList = []
         self.sonWindow = dict()
         self.hitRooms()
 
     def hitRooms(self):
         for button in self.roomList:
-            button.pack_forget()
+            button.destroy()
         self.roomList.clear()
         room_list = applyRoomsList()
+        start_pos = 300
         for room in room_list:
             tmp = tk.Radiobutton(self.canvas, text=str(room[0]) + ': ' + room[1], variable=self.intVar, value=room[0],
+                                 font=('Microsoft YaHei', 13),
                                  command=self.selectRoomChange)
             self.roomList.append(tmp)
-            tmp.pack()
+            tmp.place(x=70, y=start_pos)
+            start_pos += 40
         self.intVar.set(room_list[0][0])
 
     def selectRoomChange(self):
@@ -351,8 +359,9 @@ class RoomSelectPage:
         create_window.title('Create ChatRooms')
         create_window.grid()
         create_window.pack_propagate(0)
-        tk.Label(create_window, text='User name:', font=('Arial', 14)).place(x=50, y=70)
-        tk.Label(create_window, text='Password:', font=('Arial', 14)).place(x=50, y=110)
+        self.create_window=create_window
+        tk.Label(create_window, text='Room Number:', font=('仿宋', 14)).place(x=50, y=70)
+        tk.Label(create_window, text='Room Name:', font=('仿宋', 14)).place(x=50, y=110)
         self.roomIdRegion = tk.Entry(create_window, show=None, font=('Arial', 14))
         self.roomIdRegion.place(x=120, y=75)
         self.roomNameRegion = tk.Entry(create_window, show=None, font=('Arial', 14))
@@ -367,8 +376,9 @@ class RoomSelectPage:
         room_name = self.roomNameRegion.get()
         result_code = createRoom(room_id, room_name)
         if result_code == 303:
-            tkinter.messagebox.showinfo(title="Create Room Success", message="Create New Room Success!\n"
-                                                                             "Room ID: " + room_id + "\nRoom Name: " + room_name)
+            self.selectRoomNumber = int(room_id)
+            self.create_window.destroy()
+            self.hitinRooms()
         elif result_code == 431:
             tkinter.messagebox.showerror(title="Create Room Fail", message="Room Number Duplication!\n"
                                                                            "Room ID: " + room_id + "\nRoom Name: " + room_name)
@@ -377,11 +387,10 @@ class RoomSelectPage:
                                                                            "Room ID: " + room_id + "\nRoom Name: " + room_name)
 
     def receiveMessage2(self, room_no, speaker, message, time):
-        print(2, room_no, speaker, message, time)
         self.sonWindow[room_no].msgReceive(speaker, message, time)
 
     def removeChild(self, son):
-        self.sonWindow[son.room_no].destroy()
+        self.sonWindow[son.room_no].roomWindow.destroy()
         del self.sonWindow[son.room_no]
 
     def logout(self):
@@ -402,26 +411,30 @@ class ChatRoomPage:
         self.roomWindow = roomWindow
         self.room_no = room_no
         ChatRooms[self.room_no] = self
-
-        self.buttonSend = tk.Button(self.roomWindow, text='Send', command=self.msgSend)
-        self.buttonQuit = tk.Button(self.roomWindow, text='Quit', command=self.roomQuit)
-        self.buttonListUsers = tk.Button(self.roomWindow, text='Users in this room', command=self.listUsers)
-        self.txt_msglist = tk.Text(self.roomWindow, state='disabled')
+        self.backgroundPhoto = tk.PhotoImage(file='bgphoto.png')
+        self.welcomeBar = tk.Label(self.roomWindow, text='Chatroom: ' + str(room_no), image=self.backgroundPhoto,
+                                   compound=tk.CENTER, width=800, height=50)
+        self.buttonSend = tk.Button(self.roomWindow, text='Send', command=self.msgSend, width=10, bg='#00BFFF', bd=1,
+                                    fg='white', activebackground='#87CEEB')
+        self.buttonQuit = tk.Button(self.roomWindow, text='Quit', command=self.roomQuit, width=10)
+        self.buttonListUsers = tk.Button(self.roomWindow, text='Users in this room', command=self.listUsers, width=20)
+        self.txt_msglist = tk.Text(self.roomWindow, state='disabled', height=30, width=80)
         self.txt_msglist.tag_config('green', foreground='blue')
-        self.txt_msgsend = tk.Text(self.roomWindow)
-        self.txt_userslist = tk.Text(self.roomWindow, state='disabled')
+        self.txt_msgsend = tk.Text(self.roomWindow, height=7, width=80)
+        self.txt_userslist = tk.Text(self.roomWindow, state='disabled', height=17, width=27)
 
-        self.buttonListUsers.pack()
-        self.buttonSend.pack()
-        self.buttonQuit.pack()
-        self.txt_msglist.pack()
-        self.txt_msgsend.pack()
-        self.txt_userslist.pack()
+        self.welcomeBar.pack()
+        self.txt_msglist.place(x=10, y=60)
+        self.txt_msgsend.place(x=10, y=450)
+        self.txt_userslist.place(x=590, y=300)
+        self.buttonListUsers.place(x=600, y=550)
+        self.buttonSend.place(x=490, y=550)
+        self.buttonQuit.place(x=400, y=550)
+
         self.listUsers()
 
     def listUsers(self):
         self.user_list = listUsers(self.room_no)
-        print(2, self.user_list)
         self.txt_userslist.configure(state='normal')
         self.txt_userslist.delete('0.0', 'end')
         for user in self.user_list:
@@ -431,7 +444,6 @@ class ChatRoomPage:
     def msgSend(self):
         msg = self.txt_msgsend.get('0.0', 'end')
         self.txt_msgsend.delete('0.0', 'end')  # 清空发送消息
-        print(msg)
         t = time.strftime("%m-%d %H:%M:%S", time.localtime())
         sendMessage(self.room_no, msg, t)
         self.txt_msglist.configure(state='normal')

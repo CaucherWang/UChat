@@ -45,9 +45,9 @@ class User:
         room.multicast(299, self, message, time)
         return True
 
-    def logOut(self, DBCursor, db):
+    def logOut(self, DBCursor, db,t):
         for room in self.room_set:
-            self.quitRoom(room, DBCursor, db)
+            self.quitRoom(room, DBCursor, db,t)
         self.room_set.clear()
         self.in_room = False
         print(self.name, "QUIT UChat")
@@ -80,6 +80,7 @@ class ChatRoom:
         if len(self.users) == 0:
             DBCursor.execute("delete from chatrooms where room_number = %s;", (self.number,))
             db.commit()
+            del ChatRooms[self.number]
             self.dissolve_flag = True
             return
         self.multicast(297, leave_user, int.to_bytes(self.number, 4, byteorder='big'), t)

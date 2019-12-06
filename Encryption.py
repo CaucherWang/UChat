@@ -1,4 +1,4 @@
-from Cryptodome.Cipher import DES
+from Crypto.Cipher import DES
 
 key = b'20191126'  # 密钥 8位或16位,必须为bytes
 
@@ -40,7 +40,7 @@ def decodeId(text):
 
 def readMessage(text):
     text = text.decode('utf-8')
-    for i in range(1003):
+    for i in range(len(text)):
         if text[i] == '#' and text[i + 1] == '#' and text[i + 2] == '#':
             return text[:i]
     return False
