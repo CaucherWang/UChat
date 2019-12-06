@@ -60,11 +60,23 @@ def createUser(user_id, passwd):
     UsersDB.commit()
 
 
-# def getRoomList():
-#     DBCursor.execute("SELECT * FROM chatrooms")
-#     result = DBCursor.fetchall()  # fetchall() 获取所有记录
-#     print(result)
-#     return result
+def listRooms(conn, code):
+    room_list = ChatRoom.ChatRooms
+    print("point 2")
+    if len(room_list) == 0:
+        send_code = int.to_bytes(471, 2, byteorder='big')
+        conn.sendall(send_code)
+    else:
+        send_code = int.to_bytes(code, 2, byteorder='big')
+        msg = send_code
+        print(room_list)
+        for room in room_list.keys():
+            room_number = int.to_bytes(room, 4, byteorder='big')
+            room_name = encodeId(room_list[room].name)
+            msg = msg + room_number + room_name
+        msg += int.to_bytes(9999, 4, byteorder='big')
+        conn.sendall(msg)
+        print("point 3 ")
 
 
 def normalUserListen(user):
@@ -104,6 +116,7 @@ def normalUserListen(user):
                     send_code = int.to_bytes(432, 2, byteorder='big')
                     conn.sendall(send_code)
                 else:
+                    listRooms(conn, 296)
                     user.joinInRoom(room_no, (time.strftime("%m-%d %H:%M:%S", time.localtime())).encode('ascii'))
                     send_code = int.to_bytes(303, 2, byteorder='big')
                     conn.sendall(send_code)
@@ -123,6 +136,7 @@ def normalUserListen(user):
                 if user.quitRoom(room_no, DBCursor, UsersDB, data[6:20]):
                     send_code = int.to_bytes(305, 2, byteorder='big')
                     conn.sendall(send_code)
+                    listRooms(conn, 296)
                 else:
                     send_code = int.to_bytes(451, byteorder='big')
                     conn.sendall(send_code)
@@ -132,19 +146,7 @@ def normalUserListen(user):
                 break
             # list all rooms
             elif Command == 107:
-                room_list = ChatRoom.ChatRooms
-                if len(room_list) == 0:
-                    send_code = int.to_bytes(471, 2, byteorder='big')
-                    conn.sendall(send_code)
-                else:
-                    send_code = int.to_bytes(307, 2, byteorder='big')
-                    msg = send_code
-                    for room in room_list.keys():
-                        room_number = int.to_bytes(room, 4, byteorder='big')
-                        room_name = encodeId(room_list[room].name)
-                        msg = msg + room_number + room_name
-                    msg += int.to_bytes(9999, 4, byteorder='big')
-                    conn.sendall(msg)
+                listRooms(conn, 307)
             elif Command == 108:
                 room_no = int.from_bytes(data[2:6], byteorder='big')
                 result_msg = ChatRoom.ChatRooms[room_no].listUsers()

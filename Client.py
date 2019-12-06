@@ -57,7 +57,10 @@ def clientReceiveLogic(conn):
                 ReturnCodeFlag = True
                 ChatRooms[room_no].listUsers()
                 loginPage.receiveMessage(room_no, speaker_id, msg, data[22:36].decode('ascii'))
-
+            # 296: RECEIVE ROOM LIST
+            elif Command == 296:
+                ReturnCodeFlag = True
+                loginPage.receiveRoomList(readRoomList(data[2:]))
             elif Command == 306:
                 conn.close()
                 break
@@ -132,7 +135,7 @@ def sendMessage(room_no, message, t):
     global ReturnCodeFlag, ReturnCode
     command = int.to_bytes(102, 2, byteorder='big')
     room_number = int.to_bytes(room_no, 4, byteorder='big')
-    msg = command + room_number + t.encode('ascii')+(message + '###').encode('utf-8')
+    msg = command + room_number + t.encode('ascii') + (message + '###').encode('utf-8')
     client.sendall(msg)
     while ReturnCodeFlag or ReturnCode not in {302}:
         continue
@@ -280,6 +283,10 @@ class LoginPage:
     def receiveMessage(self, room_no, speaker, message, time):
         self.roomSelectPage.receiveMessage2(room_no, speaker, message, time)
 
+    def receiveRoomList(self, room_list):
+        print("point 5")
+        self.roomSelectPage.displayRoomList(room_list)
+
 
 '''
 Room Select Page
@@ -321,10 +328,18 @@ class RoomSelectPage:
         self.hitRooms()
 
     def hitRooms(self):
+        room_list = applyRoomsList()
+        self.displayRoomList(room_list)
+
+    def displayRoomList(self, room_list):
+        print("point 6")
+        print(room_list)
+        print(self.roomList)
         for button in self.roomList:
             button.destroy()
+        print("point 6.5")
         self.roomList.clear()
-        room_list = applyRoomsList()
+        print("point 7")
         start_pos = 300
         for room in room_list:
             tmp = tk.Radiobutton(self.canvas, text=str(room[0]) + ': ' + room[1], variable=self.intVar, value=room[0],
@@ -333,7 +348,9 @@ class RoomSelectPage:
             self.roomList.append(tmp)
             tmp.place(x=70, y=start_pos)
             start_pos += 40
+        print("point 8")
         self.intVar.set(room_list[0][0])
+        print("point 9")
 
     def selectRoomChange(self):
         self.selectRoomNumber = self.intVar.get()
@@ -359,7 +376,7 @@ class RoomSelectPage:
         create_window.title('Create ChatRooms')
         create_window.grid()
         create_window.pack_propagate(0)
-        self.create_window=create_window
+        self.create_window = create_window
         tk.Label(create_window, text='Room Number:', font=('仿宋', 14)).place(x=50, y=70)
         tk.Label(create_window, text='Room Name:', font=('仿宋', 14)).place(x=50, y=110)
         self.roomIdRegion = tk.Entry(create_window, show=None, font=('Arial', 14))
