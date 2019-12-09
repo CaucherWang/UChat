@@ -369,16 +369,18 @@ class RoomSelectPage:
         create_window.grid()
         create_window.pack_propagate(0)
         self.create_window = create_window
-        tk.Label(create_window, text='Room Number:', font=('仿宋', 14)).place(x=50, y=70)
-        tk.Label(create_window, text='Room Name:', font=('仿宋', 14)).place(x=50, y=110)
-        self.roomIdRegion = tk.Entry(create_window, show=None, font=('Arial', 14))
+        tk.Label(create_window, text='Create ChatRooms:', image=self.backgroundPhoto, compound=tk.CENTER, fg='pink', font=('Consolas', 14),
+                 width=400, height=50).pack()
+        tk.Label(create_window, text='Room Number:', font=('Microsoft YaHei', 10)).place(x=15, y=70)
+        tk.Label(create_window, text='Room Name:', font=('Microsoft YaHei', 10)).place(x=15, y=110)
+        self.roomIdRegion = tk.Entry(create_window, show=None, font=('Microsoft YaHei', 14))
         self.roomIdRegion.place(x=120, y=75)
-        self.roomNameRegion = tk.Entry(create_window, show=None, font=('Arial', 14))
+        self.roomNameRegion = tk.Entry(create_window, show=None, font=('Microsoft YaHei', 14))
         self.roomNameRegion.place(x=120, y=115)
-
-        createButton = tk.Button(create_window, text='创建', font=('STFangsong', 18), width=10, height=1,
+        createButton = tk.Button(create_window, text='创建', font=('Microsoft YaHei', 12), width=10, height=1,
+                                 bg='#00BFFF', bd=1, fg='white', activebackground='#87CEEB',
                                  command=self.createRoom)
-        createButton.place(x=120, y=150)
+        createButton.place(x=150, y=150)
 
     def createRoom(self):
         room_id = self.roomIdRegion.get()
@@ -456,7 +458,7 @@ class ChatRoomPage:
         t = time.strftime("%m-%d %H:%M:%S", time.localtime())
         sendMessage(self.room_no, msg, t)
         self.txt_msglist.configure(state='normal')
-        self.txt_msglist.insert('end', t + "我:\n\t" + msg)
+        self.txt_msglist.insert('end', t + "   我:\n\t" + msg)
         self.txt_msglist.configure(state='disabled')
 
     def msgReceive(self, speaker, msg, time):

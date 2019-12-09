@@ -67,7 +67,6 @@ def listRooms(conn, code):
     else:
         send_code = int.to_bytes(code, 2, byteorder='big')
         msg = send_code
-        print(room_list)
         for room in room_list.keys():
             room_number = int.to_bytes(room, 4, byteorder='big')
             room_name = encodeId(room_list[room].name)
@@ -90,12 +89,10 @@ def normalUserListen(user):
             # QUI: quit some room, followed with 2 Bytes room number
             # OUT: log out
             Command = int.from_bytes(data[0:2], byteorder='big')
-            # print(user.name, COMMAND_CODE[Command])
-            # receive normal message
             if Command == 102:
                 room_no = int.from_bytes(data[2:6], byteorder='big')
                 t = data[6:20]
-                msg = conn.recv(1024)
+                msg = data[20:22]+conn.recv(1024)
                 text = readMessage(msg)
                 if not text:
                     print("message not valid")
@@ -147,7 +144,6 @@ def normalUserListen(user):
             elif Command == 108:
                 room_no = int.from_bytes(data[2:6], byteorder='big')
                 result_msg = ChatRoom.ChatRooms[room_no].listUsers()
-                # print(result_msg)
                 conn.sendall(int.to_bytes(308, 2, byteorder='big') + result_msg + '###'.encode('ascii'))
             else:
                 send_code = int.to_bytes(202, 2, byteorder='big')
@@ -172,14 +168,12 @@ while True:
             data = conn.recv(34)
             Command = int.from_bytes(data[0:2], byteorder='big')
             if Command == 100:
-                # print("LOGIN REQUEST")
                 # read user id, check the format
                 user_id = decodeId(data[2:18])
                 if not user_id:
                     send_code = int.to_bytes(401, 2, byteorder='big')
                     conn.sendall(send_code)
                     continue
-                # print(user_id, " wants to log in")
                 # check whether the user id exists
                 real_password = checkUser(user_id)
                 if not real_password:
@@ -199,19 +193,16 @@ while True:
                     continue
                 # valid user! allocate thread to this connection
                 send_code = int.to_bytes(300, 2, byteorder='big')
-                # print(user_id, "LOG IN SUCCESSFULLY")
                 conn.sendall(send_code)
                 new_user = ChatRoom.User(conn, user_id)
                 thread_pool.addTask(normalUserListen, new_user)
                 break
             elif Command == 101:
-                # print("RIGIS CONNECT")
                 user_id = decodeId(data[2:18])
                 if not user_id:
                     send_code = int.to_bytes(401, 2, byteorder='big')
                     conn.sendall(send_code)
                     continue
-                # print(user_id, " wants to register")
                 result = checkUserExist(user_id)
                 if not result:
                     send_code = int.to_bytes(411, 2, byteorder='big')
@@ -224,7 +215,6 @@ while True:
                     conn.sendall(send_code)
                     continue
                 # Valid Register! Create a tuple in database
-                # print(user_id, "register successfully")
                 send_code = int.to_bytes(301, 2, byteorder='big')
                 conn.sendall(send_code)
                 createUser(user_id, passwd)

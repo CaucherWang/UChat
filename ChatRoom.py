@@ -45,9 +45,10 @@ class User:
         room.multicast(299, self, message, time)
         return True
 
-    def logOut(self, DBCursor, db,t):
-        for room in self.room_set:
-            self.quitRoom(room, DBCursor, db,t)
+    def logOut(self, DBCursor, db, t):
+        temp = self.room_set.copy()
+        for room in temp:
+            self.quitRoom(room, DBCursor, db, t)
         self.room_set.clear()
         self.in_room = False
         print(self.name, "QUIT UChat")
@@ -67,7 +68,6 @@ class ChatRoom:
         result = bytes()
         for user in self.users:
             result += encodeId(user.name)
-        print("in ChatRoom", result)
         return result
 
     def joinIn(self, new_user, t):
