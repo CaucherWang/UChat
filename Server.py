@@ -119,7 +119,6 @@ def normalUserListen(user):
                 room_no = int.from_bytes(data[2:6], byteorder='big')
                 if user.joinInRoom(room_no, data[6:20]):
                     send_code = int.to_bytes(304, 2, byteorder='big')
-                    # print(user.name, "joins in room ", room_no)
                     conn.sendall(send_code)
                 else:
                     send_code = int.to_bytes(441, 2, byteorder='big')

@@ -2,13 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2443a960-2a4e-4e76-acae-ccb015ee89a5" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChatRoom.py" beforeDir="false" afterPath="$PROJECT_DIR$/ChatRoom.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Client.py" beforeDir="false" afterPath="$PROJECT_DIR$/Client.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/Readme.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Server.py" beforeDir="false" afterPath="$PROJECT_DIR$/Server.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -211,38 +208,50 @@
       <option name="presentableId" value="Default" />
       <updated>1574337123803</updated>
       <workItem from="1574337132623" duration="12174000" />
-      <workItem from="1575860622096" duration="2189000" />
+      <workItem from="1575860622096" duration="3519000" />
     </task>
+    <task id="LOCAL-00001" summary="version 4.0 UChat finished in 2019.12.9">
+      <created>1575868520922</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1575868520923</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="version 4.0 UChat finished in 2019.12.9" />
+    <option name="LAST_COMMIT_MESSAGE" value="version 4.0 UChat finished in 2019.12.9" />
   </component>
   <component name="WindowStateProjectService">
     <state x="140" y="91" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1575860716791">
       <screen x="0" y="0" width="1368" height="872" />
     </state>
     <state x="140" y="91" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1368.872@0.0.1368.872" timestamp="1575860716791" />
-    <state x="291" y="30" key="CommitChangelistDialog2" timestamp="1575868205625">
+    <state x="291" y="30" key="CommitChangelistDialog2" timestamp="1575868519741">
       <screen x="0" y="0" width="1368" height="872" />
     </state>
-    <state x="291" y="30" key="CommitChangelistDialog2/0.0.1368.872@0.0.1368.872" timestamp="1575868205625" />
-    <state width="1326" height="268" key="GridCell.Tab.0.bottom" timestamp="1575868390981">
+    <state x="291" y="30" key="CommitChangelistDialog2/0.0.1368.872@0.0.1368.872" timestamp="1575868519741" />
+    <state width="1326" height="268" key="GridCell.Tab.0.bottom" timestamp="1575869796680">
       <screen x="0" y="0" width="1368" height="872" />
     </state>
-    <state width="1326" height="268" key="GridCell.Tab.0.bottom/0.0.1368.872@0.0.1368.872" timestamp="1575868390981" />
-    <state width="1326" height="268" key="GridCell.Tab.0.center" timestamp="1575868390980">
+    <state width="1326" height="268" key="GridCell.Tab.0.bottom/0.0.1368.872@0.0.1368.872" timestamp="1575869796680" />
+    <state width="1326" height="268" key="GridCell.Tab.0.center" timestamp="1575869796680">
       <screen x="0" y="0" width="1368" height="872" />
     </state>
-    <state width="1326" height="268" key="GridCell.Tab.0.center/0.0.1368.872@0.0.1368.872" timestamp="1575868390980" />
-    <state width="1326" height="268" key="GridCell.Tab.0.left" timestamp="1575868390980">
+    <state width="1326" height="268" key="GridCell.Tab.0.center/0.0.1368.872@0.0.1368.872" timestamp="1575869796680" />
+    <state width="1326" height="268" key="GridCell.Tab.0.left" timestamp="1575869796680">
       <screen x="0" y="0" width="1368" height="872" />
     </state>
-    <state width="1326" height="268" key="GridCell.Tab.0.left/0.0.1368.872@0.0.1368.872" timestamp="1575868390980" />
-    <state width="1326" height="268" key="GridCell.Tab.0.right" timestamp="1575868390981">
+    <state width="1326" height="268" key="GridCell.Tab.0.left/0.0.1368.872@0.0.1368.872" timestamp="1575869796680" />
+    <state width="1326" height="268" key="GridCell.Tab.0.right" timestamp="1575869796680">
       <screen x="0" y="0" width="1368" height="872" />
     </state>
-    <state width="1326" height="268" key="GridCell.Tab.0.right/0.0.1368.872@0.0.1368.872" timestamp="1575868390981" />
+    <state width="1326" height="268" key="GridCell.Tab.0.right/0.0.1368.872@0.0.1368.872" timestamp="1575869796680" />
     <state x="165" y="11" key="SettingsEditor" timestamp="1575860647668">
       <screen x="0" y="0" width="1368" height="872" />
     </state>

@@ -31,8 +31,6 @@ class User:
         self.room_set.remove(room_no)
         result = ChatRooms.get(room_no, False)
         result.leave(self, DBCursor, db, t)
-        # multicast to all users in room
-        # result.multicast(self,)
         if len(self.room_set) == 0:
             self.in_room = False
         return True

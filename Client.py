@@ -30,7 +30,6 @@ def clientReceiveLogic(conn):
         data = MessageQueue.get()
         Command = int.from_bytes(data[0:2], byteorder='big')
         if Command in COMMAND_CODE.keys():
-            # print(Command, '  ', COMMAND_CODE[Command])
             # wait for last message to be finished
             while not ReturnCodeFlag:
                 continue
@@ -41,7 +40,6 @@ def clientReceiveLogic(conn):
                 message = readMessage(data[36:])
                 ReturnCodeFlag = True
                 if not message:
-                    # print("RECEIVE DATA WITH NO END")
                     continue
                 loginPage.receiveMessage(int.from_bytes(data[2:6], byteorder='big'), decodeId(data[6:22]), message,
                                          data[22:36].decode('ascii'))

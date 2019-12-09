@@ -1,5 +1,9 @@
 # UChat设计文档
 
+**<u>Contributor:</u>**
+王泽宇 17307130038 计算机科学与技术
+杨希希 16307130365 计算机科学与技术
+
 [TOC]
 
 ## 0. How to Play UChat
@@ -18,6 +22,7 @@ Settings.py修改`HOST`为服务器ip地址，修改`PORT`为服务器端口号
 
 - 服务器端首先开启数据库服务器，之后运行Server.py ；
   - 安装包：Server.py, ThreadPool.py, Settings.py, Encryption.py, ChatRoom.py
+  - 安装MySQL>=8.0， 导入`Script.sql`脚本
 - 客户端直接运行Client.py
   - 安装包：Client.py, Settings.py, Encryption.py, ThreadPool.py 
 
@@ -56,11 +61,8 @@ Settings.py修改`HOST`为服务器ip地址，修改`PORT`为服务器端口号
 
 - 设计思路：发送者发送消息给服务器，服务器保留聊天室内所有用户的TCP连接；服务器收到之后在发送者线程中将消息放入房间的消息队列中；房间有单独的线程组播消息，无限循环取出消息队列的消息，依次为房间内每个用户发送消息，直到收到房间解散标志。
 
-- 示意图：
-
-  <img src="C:\Users\64451\Pictures\md_images\image-20191201141125645.png" alt="image-20191201141125645" style="zoom:50%;" />
-
   
+
 
 ## 2. 客户端处理逻辑
 
@@ -149,7 +151,7 @@ def checkUser(user_id):
 
 ### 6.1 命令码对照表
 
-<img src="C:\Users\64451\Pictures\md_images\image-20191201152803391.png" alt="image-20191201152803391" style="zoom:57%;" />
+
 
 ### 6.2 请求消息头部设计
 
@@ -163,9 +165,9 @@ def checkUser(user_id):
 
 - 103-创建新房间：4字节`room_number`+16字节`room_name`。头部总长度：22Bytes
 
-- 104-加入房间：4字节`room_number`。头部总长度：6Bytes
+- 104-加入房间：4字节`room_number`+14字节`send_time`。头部总长度：20Bytes
 
-- 105-离开某房间：4字节`room_number`。头部总长度：6Bytes
+- 105-离开某房间：4字节`room_number`+14字节`send_time`。头部总长度：20Bytes
 
 - 106-用户登出：无额外部分。头部总长度：2Bytes
 
@@ -180,5 +182,11 @@ def checkUser(user_id):
 
 ​	所有应答消息头部都有固定的2字节的命令码加4字节的房间号加16字节`speaker_id`，剩下均为可选部分。
 
-- 298-新用户进入房间通知消息：4字节`room_number`。头部总长度：22Bytes
+- 296，307-收到房间列表，被通知收到房间列表：每个enrty，4字节`room_number`+16字节`room_name`，以房间号`9999`作为结束标志
+
+- 297-用户离开房间：4字节`room_number`+16字节`speaker_id`+14字节`send_time`。头部总长度：36Bytes
+
+- 298-新用户进入房间通知消息：4字节`room_number`+16字节`speaker_id`+14字节`send_time`。头部总长度：36Bytes
+- 299-收到消息：4字节`room_number`+16字节`speaker_id`+14字节`send_time`。头部总长度：36Bytes
+- 308：被通知收到用户列表：每个entry，16字节`user_id`，以`####`作为结束标志。
 
