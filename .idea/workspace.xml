@@ -3,10 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="2443a960-2a4e-4e76-acae-ccb015ee89a5" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ChatRoom.py" beforeDir="false" afterPath="$PROJECT_DIR$/ChatRoom.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client.py" beforeDir="false" afterPath="$PROJECT_DIR$/Client.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/Readme.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server.py" beforeDir="false" afterPath="$PROJECT_DIR$/Server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test2.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,6 +36,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -179,8 +179,8 @@
       <list>
         <item itemvalue="Python.Client" />
         <item itemvalue="Python.Server (1)" />
-        <item itemvalue="Python.ChatRoom" />
         <item itemvalue="Python.test" />
+        <item itemvalue="Python.ChatRoom" />
         <item itemvalue="Python.Test" />
       </list>
     </recent_temporary>
@@ -209,6 +209,12 @@
       <updated>1574337123803</updated>
       <workItem from="1574337132623" duration="12174000" />
       <workItem from="1575860622096" duration="3519000" />
+      <workItem from="1575957656359" duration="556000" />
+      <workItem from="1576498184577" duration="2410000" />
+      <workItem from="1576912074635" duration="1885000" />
+      <workItem from="1576994674779" duration="64000" />
+      <workItem from="1577268966782" duration="1421000" />
+      <workItem from="1577338455574" duration="2294000" />
     </task>
     <task id="LOCAL-00001" summary="version 4.0 UChat finished in 2019.12.9">
       <created>1575868520922</created>
@@ -236,32 +242,45 @@
       <screen x="0" y="0" width="1368" height="872" />
     </state>
     <state x="291" y="30" key="CommitChangelistDialog2/0.0.1368.872@0.0.1368.872" timestamp="1575868519741" />
-    <state width="1326" height="268" key="GridCell.Tab.0.bottom" timestamp="1575869796680">
+    <state x="415" y="178" key="FileChooserDialogImpl" timestamp="1575957734064">
       <screen x="0" y="0" width="1368" height="872" />
     </state>
-    <state width="1326" height="268" key="GridCell.Tab.0.bottom/0.0.1368.872@0.0.1368.872" timestamp="1575869796680" />
-    <state width="1326" height="268" key="GridCell.Tab.0.center" timestamp="1575869796680">
+    <state x="415" y="178" key="FileChooserDialogImpl/0.0.1368.872@0.0.1368.872" timestamp="1575957734064" />
+    <state width="1326" height="147" key="GridCell.Tab.0.bottom" timestamp="1577339632706">
       <screen x="0" y="0" width="1368" height="872" />
     </state>
-    <state width="1326" height="268" key="GridCell.Tab.0.center/0.0.1368.872@0.0.1368.872" timestamp="1575869796680" />
-    <state width="1326" height="268" key="GridCell.Tab.0.left" timestamp="1575869796680">
+    <state width="1326" height="147" key="GridCell.Tab.0.bottom/0.0.1368.872@0.0.1368.872" timestamp="1577339632706" />
+    <state width="1326" height="147" key="GridCell.Tab.0.center" timestamp="1577339632706">
       <screen x="0" y="0" width="1368" height="872" />
     </state>
-    <state width="1326" height="268" key="GridCell.Tab.0.left/0.0.1368.872@0.0.1368.872" timestamp="1575869796680" />
-    <state width="1326" height="268" key="GridCell.Tab.0.right" timestamp="1575869796680">
+    <state width="1326" height="147" key="GridCell.Tab.0.center/0.0.1368.872@0.0.1368.872" timestamp="1577339632706" />
+    <state width="1326" height="147" key="GridCell.Tab.0.left" timestamp="1577339632706">
       <screen x="0" y="0" width="1368" height="872" />
     </state>
-    <state width="1326" height="268" key="GridCell.Tab.0.right/0.0.1368.872@0.0.1368.872" timestamp="1575869796680" />
+    <state width="1326" height="147" key="GridCell.Tab.0.left/0.0.1368.872@0.0.1368.872" timestamp="1577339632706" />
+    <state width="1326" height="147" key="GridCell.Tab.0.right" timestamp="1577339632706">
+      <screen x="0" y="0" width="1368" height="872" />
+    </state>
+    <state width="1326" height="147" key="GridCell.Tab.0.right/0.0.1368.872@0.0.1368.872" timestamp="1577339632706" />
     <state x="165" y="11" key="SettingsEditor" timestamp="1575860647668">
       <screen x="0" y="0" width="1368" height="872" />
     </state>
     <state x="165" y="11" key="SettingsEditor/0.0.1368.872@0.0.1368.872" timestamp="1575860647668" />
+    <state x="0" y="47" key="new project wizard" timestamp="1575958209758">
+      <screen x="0" y="0" width="1368" height="872" />
+    </state>
+    <state x="0" y="47" key="new project wizard/0.0.1368.872@0.0.1368.872" timestamp="1575958209758" />
+    <state x="344" y="201" key="run.anything.popup" timestamp="1576498629520">
+      <screen x="0" y="0" width="1368" height="872" />
+    </state>
+    <state x="344" y="201" key="run.anything.popup/0.0.1368.872@0.0.1368.872" timestamp="1576498629520" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/UChat$Client.coverage" NAME="Client Coverage Results" MODIFIED="1575868389997" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/UChat$Client.coverage" NAME="Client Coverage Results" MODIFIED="1577339067562" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/UChat$test.coverage" NAME="test Coverage Results" MODIFIED="1576912909166" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/UChat$ChatRoom.coverage" NAME="ChatRoom Coverage Results" MODIFIED="1575862178491" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/UChat$Server.coverage" NAME="Server Coverage Results" MODIFIED="1574339831853" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/UChat/UChat" />
     <SUITE FILE_PATH="coverage/UChat$Test.coverage" NAME="Test Coverage Results" MODIFIED="1574352094364" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/UChat/UChat" />
-    <SUITE FILE_PATH="coverage/UChat$Server__1_.coverage" NAME="Server (1) Coverage Results" MODIFIED="1575868386956" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/UChat$Server__1_.coverage" NAME="Server (1) Coverage Results" MODIFIED="1577338527984" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
